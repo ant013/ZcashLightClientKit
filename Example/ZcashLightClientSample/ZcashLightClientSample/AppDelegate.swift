@@ -24,6 +24,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             return sync
         } else {
             let sync = try! SDKSynchronizer(initializer: sharedWallet) // this must break if fails
+            sync.sendingLogger = { string in
+                print(string)
+            }
             self.synchronizer = sync
             return sync
         }

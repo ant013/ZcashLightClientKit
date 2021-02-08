@@ -45,8 +45,10 @@ class PersistentTransactionManager: OutboundTransactionManager {
             guard let self = self else { return }
             do {
                 let encodedTransaction = try self.encoder.createTransaction(spendingKey: spendingKey, zatoshi: pendingTransaction.value, to: pendingTransaction.toAddress, memo: pendingTransaction.memo?.asZcashTransactionMemo(), from: pendingTransaction.accountIndex)
+                LoggerProxy.debug("=>=>encode(spendingKey raw count: \(encodedTransaction.raw?.count ?? 0)")
                 let transaction = try self.encoder.expandEncodedTransaction(encodedTransaction)
-                
+                LoggerProxy.debug("=>=>encode(spendingKey expanded: \(transaction)")
+
                 var pending = pendingTransaction
                 pending.encodeAttempts = pending.encodeAttempts + 1
                 pending.raw = encodedTransaction.raw
@@ -54,9 +56,12 @@ class PersistentTransactionManager: OutboundTransactionManager {
                 pending.expiryHeight = transaction.expiryHeight ?? BlockHeight.empty()
                 pending.minedHeight = transaction.minedHeight ?? BlockHeight.empty()
                 try self.repository.update(pending)
+
+                LoggerProxy.debug("=>=>encode(spendingKey pendingValue: \(pending.value)")
                 result(.success(pending))
             } catch StorageError.updateFailed {
                 DispatchQueue.main.async {
+                    LoggerProxy.debug("=>=>encode(spendingKey update error!!!")
                     result(.failure(TransactionManagerError.updateFailed(tx: pendingTransaction)))
                 }
             } catch {
@@ -101,7 +106,7 @@ class PersistentTransactionManager: OutboundTransactionManager {
                     result(.failure(TransactionManagerError.submitFailed(tx: tx, errorCode: Int(response.errorCode))))
                     return
                 }
-                
+                LoggerProxy.debug("=>=>submit(pendingTransaction success value: \(tx.value)")
                 result(.success(tx))
             } catch {
                 try? self.updateOnFailure(tx: pendingTransaction, error: error)

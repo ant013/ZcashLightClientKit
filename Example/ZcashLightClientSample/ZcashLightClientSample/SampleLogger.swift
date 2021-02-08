@@ -56,6 +56,7 @@ class SampleLogger: ZcashLightClientKit.Logger {
         let fileName = file as NSString
         
         os_log("[%@] %@ - %@ - Line: %d -> %@", log: Self.oslog, type: .default, level, fileName.lastPathComponent, function, line, message)
+        print("\(level) - \(message)")
     }
     
     

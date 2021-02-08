@@ -90,7 +90,8 @@ public class SDKSynchronizer: Synchronizer {
     
     private var transactionManager: OutboundTransactionManager
     private var transactionRepository: TransactionRepository
-    
+
+    public var sendingLogger: ((String) -> ())?
     
     /**
      Creates an SDKSynchronizer instance
@@ -344,8 +345,8 @@ public class SDKSynchronizer: Synchronizer {
     }
     
     func createToAddress(spendingKey: String, zatoshi: Int64, toAddress: String, memo: String?, from accountIndex: Int, resultBlock: @escaping (Result<PendingTransactionEntity, Error>) -> Void) {
-        
         do {
+            sendingLogger?("==> createToAddress: \(zatoshi): address: \(toAddress)")
             let spend = try transactionManager.initSpend(zatoshi: Int(zatoshi), toAddress: toAddress, memo: memo, from: accountIndex)
             
             transactionManager.encode(spendingKey: spendingKey, pendingTransaction: spend) { [weak self] (result) in
@@ -356,9 +357,11 @@ public class SDKSynchronizer: Synchronizer {
                     self.transactionManager.submit(pendingTransaction: tx) { (submitResult) in
                         switch submitResult {
                         case .success(let submittedTx):
+                            self.sendingLogger?("==> createToAddress(Success): \(submittedTx.value): address: \(submittedTx.toAddress) pending state: \(submittedTx.isPending())")
                             resultBlock(.success(submittedTx))
                         case .failure(let submissionError):
                             DispatchQueue.main.async {
+                                self.sendingLogger?("==> createToAddress(Failure): \(submissionError.localizedDescription)")
                                 resultBlock(.failure(submissionError))
                             }
                         }

@@ -14,7 +14,7 @@ struct DemoAppConfig {
     static var port: Int = 9067
     static var birthdayHeight: BlockHeight = ZcashSDK.isMainnet ? 663174 : 620_000
     static var network = ZcashSDK.isMainnet ? ZcashNetwork.mainNet : ZcashNetwork.testNet
-    static var seed = ZcashSDK.isMainnet ? try! Mnemonic.deterministicSeedBytes(from: "still champion voice habit trend flight survey between bitter process artefact blind carbon truly provide dizzy crush flush breeze blouse charge solid fish spread") : Array("testreferencealicetestreferencealice".utf8)
+    static var seed = ZcashSDK.isMainnet ? try! Mnemonic.deterministicSeedBytes(from: "") : Array("testreferencealicetestreferencealice".utf8)
     static var address: String {
         "\(host):\(port)"
     }
